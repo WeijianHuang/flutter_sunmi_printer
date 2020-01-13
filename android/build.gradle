@@ -38,4 +38,6 @@ android {
 
 dependencies{
     implementation(name: 'payLib', ext: 'aar')
+    // https://mvnrepository.com/artifact/com.google.zxing/core
+    implementation group: 'com.google.zxing', name: 'core', version: '3.4.0'
 }
