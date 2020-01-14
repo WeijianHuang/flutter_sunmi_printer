@@ -112,14 +112,18 @@ public class AidlUtil {
     private int[] darkness = new int[]{0x0600, 0x0500, 0x0400, 0x0300, 0x0200, 0x0100, 0,
             0xffff, 0xfeff, 0xfdff, 0xfcff, 0xfbff, 0xfaff};
 
-    public void setDarkness(int index) throws RemoteException {
+    public void setDarkness(int index) {
         if (woyouService == null) {
             return;
         }
 
         int k = darkness[index];
-        woyouService.sendRAWData(ESCUtil.setPrinterDarkness(k), null);
-        woyouService.printerSelfChecking(null);
+        try {
+            woyouService.sendRAWData(ESCUtil.setPrinterDarkness(k), null);
+            woyouService.printerSelfChecking(null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -127,20 +131,19 @@ public class AidlUtil {
      *
      * @return list
      */
-    public List<String> getPrinterInfo(PrinterCallback printerCallback1, PrinterCallback printerCallback2) throws RemoteException {
+    public List<String> getPrinterInfo(PrinterCallback printerCallback1, PrinterCallback printerCallback2) {
         if (woyouService == null) {
             return null;
         }
 
         List<String> info = new ArrayList<>();
-        woyouService.getPrintedLength(generateCB(printerCallback1));
-        woyouService.getPrinterFactory(generateCB(printerCallback2));
-        info.add(woyouService.getPrinterSerialNo());
-        info.add(woyouService.getPrinterModal());
-        info.add(woyouService.getPrinterVersion());
-        //info.add(woyouService.getServiceVersion());
         PackageManager packageManager = context.getPackageManager();
         try {
+            woyouService.getPrintedLength(generateCB(printerCallback1));
+            woyouService.getPrinterFactory(generateCB(printerCallback2));
+            info.add(woyouService.getPrinterSerialNo());
+            info.add(woyouService.getPrinterModal());
+            info.add(woyouService.getPrinterVersion());
             PackageInfo packageInfo = packageManager.getPackageInfo(SERVICE＿PACKAGE, 0);
             if (packageInfo != null) {
                 info.add(packageInfo.versionName);
@@ -149,7 +152,7 @@ public class AidlUtil {
                 info.add("");
                 info.add("");
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -159,158 +162,206 @@ public class AidlUtil {
     /**
      * 初始化打印机
      */
-    public void initPrinter() throws RemoteException {
+    public void initPrinter() {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.printerInit(null);
+        try {
+            woyouService.printerInit(null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setFontSize(int size) throws RemoteException {
-        woyouService.setFontSize(size, null);
+    public void setFontSize(int size) {
+        try {
+            woyouService.setFontSize(size, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 打印二维码
      */
-    public void printQr(String data, int modulesize, int errorlevel) throws RemoteException {
+    public void printQr(String data, int modulesize, int errorlevel) {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.setAlignment(1, null);
-        woyouService.printQRCode(data, modulesize, errorlevel, null);
-        woyouService.lineWrap(3, null);
+        try {
+            woyouService.setAlignment(1, null);
+            woyouService.printQRCode(data, modulesize, errorlevel, null);
+            woyouService.lineWrap(3, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 打印条形码
      */
-    public void printBarCode(String data, int symbology, int height, int width, int textposition) throws RemoteException {
+    public void printBarCode(String data, int symbology, int height, int width, int textposition) {
         if (woyouService == null) {
             return;
         }
-
-        woyouService.printBarCode(data, symbology, height, width, textposition, null);
-        woyouService.lineWrap(3, null);
+        try {
+            woyouService.printBarCode(data, symbology, height, width, textposition, null);
+            woyouService.lineWrap(3, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 打印文字
      */
-    public void printText(String content, float size, boolean isBold, boolean isUnderLine) throws RemoteException {
+    public void printText(String content, float size, boolean isBold, boolean isUnderLine) {
         if (woyouService == null) {
             return;
         }
+        try {
+            if (isBold) {
+                woyouService.sendRAWData(ESCUtil.boldOn(), null);
+            } else {
+                woyouService.sendRAWData(ESCUtil.boldOff(), null);
+            }
 
-        if (isBold) {
-            woyouService.sendRAWData(ESCUtil.boldOn(), null);
-        } else {
-            woyouService.sendRAWData(ESCUtil.boldOff(), null);
-        }
+            if (isUnderLine) {
+                woyouService.sendRAWData(ESCUtil.underlineWithOneDotWidthOn(), null);
+            } else {
+                woyouService.sendRAWData(ESCUtil.underlineOff(), null);
+            }
 
-        if (isUnderLine) {
-            woyouService.sendRAWData(ESCUtil.underlineWithOneDotWidthOn(), null);
-        } else {
-            woyouService.sendRAWData(ESCUtil.underlineOff(), null);
-        }
-
-        woyouService.printTextWithFont(content, null, size, null);
+            woyouService.printTextWithFont(content, null, size, null);
 //            woyouService.lineWrap(3, null);
-
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
      *打印图片
      */
-    public void printBitmap(Bitmap bitmap) throws RemoteException {
+    public void printBitmap(Bitmap bitmap) {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.setAlignment(1, null);
-        woyouService.printBitmap(bitmap, null);
+        try {
+            woyouService.setAlignment(1, null);
+            woyouService.printBitmap(bitmap, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void lineWrap(int line) throws RemoteException {
-        woyouService.lineWrap(line, null);
+    public void lineWrap(int line) {
+        try {
+            woyouService.lineWrap(line, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
 
     /**
      * 打印图片和文字按照指定排列顺序
      */
-    public void printBitmap(Bitmap bitmap, int orientation) throws RemoteException {
+    public void printBitmap(Bitmap bitmap, int orientation) {
         if (woyouService == null) {
             Toast.makeText(context, "服务已断开！", Toast.LENGTH_LONG).show();
             return;
         }
+        try {
+            if (orientation == 0) {
+                woyouService.printBitmap(bitmap, null);
+                woyouService.printText("横向排列\n", null);
+                woyouService.printBitmap(bitmap, null);
+                woyouService.printText("横向排列\n", null);
+            } else {
+                woyouService.printBitmap(bitmap, null);
+                woyouService.printText("\n纵向排列\n", null);
+                woyouService.printBitmap(bitmap, null);
+                woyouService.printText("\n纵向排列\n", null);
+            }
+            woyouService.lineWrap(3, null);
 
-        if (orientation == 0) {
-            woyouService.printBitmap(bitmap, null);
-            woyouService.printText("横向排列\n", null);
-            woyouService.printBitmap(bitmap, null);
-            woyouService.printText("横向排列\n", null);
-        } else {
-            woyouService.printBitmap(bitmap, null);
-            woyouService.printText("\n纵向排列\n", null);
-            woyouService.printBitmap(bitmap, null);
-            woyouService.printText("\n纵向排列\n", null);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        woyouService.lineWrap(3, null);
     }
 
     /**
      * 打印表格
      */
-    public void printTable(LinkedList<TableItem> list) throws RemoteException {
+    public void printTable(LinkedList<TableItem> list) {
         if (woyouService == null) {
             return;
         }
-
-        for (TableItem tableItem : list) {
-            woyouService.printColumnsString(tableItem.getText(), tableItem.getWidth(), tableItem.getAlign(), null);
+        try {
+            for (TableItem tableItem : list) {
+                woyouService.printColumnsString(tableItem.getText(), tableItem.getWidth(), tableItem.getAlign(), null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     /**
      * 打印表格项
      */
-    public void printTableItem(String[] text, int[] width, int[] align) throws RemoteException {
+    public void printTableItem(String[] text, int[] width, int[] align) {
         if (woyouService == null) {
             return;
         }
-        woyouService.printColumnsString(text, width, align, null);
+        try {
+            woyouService.printColumnsString(text, width, align, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
      * 空打三行！
      */
-    public void print3Line() throws RemoteException {
+    public void print3Line() {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.lineWrap(3, null);
+        try {
+            woyouService.lineWrap(3, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
 
-    public void sendRawData(byte[] data) throws RemoteException {
+    public void sendRawData(byte[] data) {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.sendRAWData(data, null);
+        try {
+            woyouService.sendRAWData(data, null);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void sendRawDatabyBuffer(byte[] data, ICallback iCallback) throws RemoteException {
+    public void sendRawDatabyBuffer(byte[] data, ICallback iCallback) {
         if (woyouService == null) {
             return;
         }
 
-        woyouService.enterPrinterBuffer(true);
-        woyouService.sendRAWData(data, iCallback);
-        woyouService.exitPrinterBufferWithCallback(true, iCallback);
+        try {
+            woyouService.enterPrinterBuffer(true);
+            woyouService.sendRAWData(data, iCallback);
+            woyouService.exitPrinterBufferWithCallback(true, iCallback);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }
