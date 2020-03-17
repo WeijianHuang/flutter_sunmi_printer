@@ -39,5 +39,5 @@ android {
 dependencies{
     implementation(name: 'payLib', ext: 'aar')
     // https://mvnrepository.com/artifact/com.google.zxing/core
-    implementation(name: 'core-3.3.3', ext: 'jar')
+    compileOnly(name: 'core-3.4.0', ext: 'jar')
 }
